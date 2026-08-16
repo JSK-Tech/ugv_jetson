@@ -703,17 +703,18 @@ socket.on('update', function(data) {
         document.getElementById("photos-size").innerHTML = data[picture_size] + " MB";
         document.getElementById("videos-size").innerHTML = data[video_size] + " MB";
 
-        document.getElementById("v_in").innerHTML = data[base_voltage].toFixed(1);
+        var baseVoltage = data[base_voltage] > 100 ? data[base_voltage] / 100 : data[base_voltage];
+        document.getElementById("v_in").innerHTML = baseVoltage.toFixed(1);
         
         var element = document.getElementById("b_state");
         element.classList.remove("baterry_state", "baterry_state1", "baterry_state2", "baterry_state3");
-        if (data[base_voltage] >= 10.5) {
+        if (baseVoltage >= 10.5) {
             element.classList.add("baterry_state");
-        } else if (data[base_voltage] >= 10) {
+        } else if (baseVoltage >= 10) {
             element.classList.add("baterry_state","baterry_state3");
-        } else if (data[base_voltage] >= 9.5) {
+        } else if (baseVoltage >= 9.5) {
             element.classList.add("baterry_state","baterry_state2");
-        } else if (data[base_voltage] < 9.5) {
+        } else if (baseVoltage < 9.5) {
             element.classList.add("baterry_state","baterry_state1");
         }
     } catch(e) {

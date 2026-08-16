@@ -7,20 +7,17 @@ if [ -n "$SUDO_USER" ] || [ -n "$SUDO_UID" ]; then
     exit 1
 fi
 
-# Define the first cron job and its schedule
-cron_job1="@reboot sleep 1 && whoami && pulseaudio --start && sleep 1 && XDG_RUNTIME_DIR=/run/user/$(id -u) ~/ugv_jetson/ugv-env/bin/python ~/ugv_jetson/app.py >> ~/ugv.log 2>&1"
+# Define the first cron job and its schedule.
+cron_job1="@reboot ~/ugv_jetson/scripts/start-web-ui-after-time-sync.sh >> ~/ugv.log 2>&1"
 
 # Define the second cron job for starting Jupyter
 # cron_job2="@reboot sleep 1 && /bin/bash ~/ugv_jetson/start_jupyter.sh >> ~/jupyter_log.log 2>&1"
 
-# Check if the first cron job already exists in the user's crontab
-if crontab -l | grep -q "$cron_job1"; then
-    echo "First cron job is already set, no changes made."
-else
-    # Add the first cron job for the user
-    (crontab -l 2>/dev/null; echo "$cron_job1") | crontab -
-    echo "First cron job added successfully."
-fi
+# Replace only the UGV Web UI auto-start entry, preserving other user cron jobs.
+existing_crontab="$(crontab -l 2>/dev/null || true)"
+filtered_crontab="$(printf '%s\n' "$existing_crontab" | grep -v -E 'ugv_jetson/(app\.py|scripts/start-web-ui-after-time-sync\.sh)' || true)"
+printf '%s\n%s\n' "$filtered_crontab" "$cron_job1" | sed '/^$/d' | crontab -
+echo "UGV Web UI auto-start now waits for LAN time synchronization."
 
 # Check if the second cron job already exists in the user's crontab
 # if crontab -l | grep -q "$cron_job2"; then
