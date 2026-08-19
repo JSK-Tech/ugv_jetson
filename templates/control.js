@@ -587,6 +587,24 @@ function removeAllIcoClass(ElName){
 var socketJson = io('http://' + location.host + '/json');
 socketJson.emit('json', {'T':1,'L':0,'R':0})
 
+let io4LedLevel = 0;
+let io5LedLevel = 0;
+
+function previewLedLevel(channel, value) {
+    document.getElementById(channel + '_led_value').textContent = value;
+}
+
+function setLedLevel(channel, value) {
+    const level = Math.max(0, Math.min(255, Number(value)));
+    if (channel === 'io4') {
+        io4LedLevel = level;
+    } else {
+        io5LedLevel = level;
+    }
+
+    socketJson.emit('json', {'T': 132, 'IO4': io4LedLevel, 'IO5': io5LedLevel});
+}
+
 var socket = io('http://' + location.host + '/ctrl');
 socket.emit('request_data');
 
